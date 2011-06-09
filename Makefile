@@ -10,3 +10,4 @@ diamond_easy :
 
 clean :
 	rm -rf *.o
+	rm diamond_easy
