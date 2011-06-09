@@ -30,6 +30,7 @@ public:
 	void setSizes(const int3& sizes);
 	double dt() const;
 
+	double temperature() const { return _T; }
 	double kMolecule(const std::string& key) const;
 
 	double percentOfNotDimers() const;
@@ -43,6 +44,8 @@ private:
 private:
 	std::map<std::string, VarVal> _params;
 	int3 _sizes;
+
+	double _T;
 };
 
 }

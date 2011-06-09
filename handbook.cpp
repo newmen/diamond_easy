@@ -63,6 +63,9 @@ void Handbook::parseConfig(const std::string& config_file_name) {
 			break;
 		}
 	}
+
+	VarVal temperature_section = _params.find("temperature")->second;
+	_T = temperature_section.find("T")->second;
 }
 
 void Handbook::setSizes(const int3& sizes) {
@@ -95,16 +98,13 @@ double Handbook::kMolecule(const std::string& key) const {
 }
 
 double Handbook::kMole(const std::string& key) const {
-	VarVal temperature_section = _params.find("temperature")->second;
-	double T = temperature_section.find("T")->second;
-
 	VarVal activation_energies_section = _params.find("activation_energies")->second;
 	double Ea = activation_energies_section.find(key)->second;
 
 	VarVal factors_section = _params.find("factors")->second;
 	double A = factors_section.find(key)->second;
 
-	return A * exp(-Ea / (R * T));
+	return A * exp(-Ea / (R * _T));
 }
 
 double Handbook::percentOfNotDimers() const {

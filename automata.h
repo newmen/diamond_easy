@@ -58,10 +58,27 @@ private:
 
 	static SetOfCells* differentCells(const SetOfCells& s1, const SetOfCells& s2);
 
+	Cell* getCell(const int3& coords) const {
+		return _cells[coords.z][coords.y][coords.x];
+	}
+
+	bool isAvailableForMigrating(Cell* cells[2]) const {
+		return cells[0] && cells[1] && ((cells[0]->active() > 0 && cells[1]->active() > 0) || isDimer(cells));
+	}
+
+	bool isAvailableForMigrating(Cell* cell1, Cell* cell2) const {
+		Cell* cells[2] = { cell1, cell2 };
+		return isAvailableForMigrating(cells);
+	}
+
+	bool isDimer(Cell* cells[2]) const {
+		return _dimers.count(cells[0]) > 0 && _dimers.count(cells[1]) > 0
+				&& ((_dimer_bonds.count(cells[0]) > 0 && _dimer_bonds.find(cells[0])->second == cells[1])
+						|| (_dimer_bonds.count(cells[1]) > 0 && _dimer_bonds.find(cells[1])->second == cells[0]));
+	}
+
 	void activate(Cell* cell);
 	void deactivate(Cell* cell);
-	bool isAvailableForMigrating(Cell* cells[2]) const;
-	bool isDimer(Cell* cells[2]) const;
 	void formDimerPart(Cell* cell);
 	void deleteDimer(Cell* cell1, Cell* cell2);
 	static void topNeighbourCoords(const int3& coords1, const int3& coords2, int3& top_neighbour_coords);

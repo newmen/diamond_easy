@@ -17,9 +17,6 @@
 
 namespace DiamondCA {
 
-typedef void (Automata::*StepFunc)();
-typedef std::vector<StepFunc> StepFuncs;
-
 typedef std::vector<Cell*> VariantCells;
 typedef std::vector<int3> VariantCoords;
 
@@ -192,6 +189,9 @@ void Automata::exploreArea() {
 void Automata::run(unsigned int steps, unsigned int out_any_step) {
 	exploreArea();
 
+	typedef void (Automata::*StepFunc)();
+	typedef std::vector<StepFunc> StepFuncs;
+
 	StepFuncs step_funcs;
 	if (_config["hydrogen-migration"]) step_funcs.push_back(&Automata::migratingHydrogen);
 	if (_config["activate-surface"]) step_funcs.push_back(&Automata::activatingSurface);
@@ -204,24 +204,31 @@ void Automata::run(unsigned int steps, unsigned int out_any_step) {
 	}
 
 	unsigned int percent_step = (unsigned int)(steps * 0.001);
+	if (percent_step == 0) percent_step = 1;
 
 	srand(time(0));
 
 	_time = 0;
-	for (unsigned int step = 0; step < steps; ++step) {
+	_outputer->outputStep();
+
+	unsigned int step = 0;
+	for ( ; step < steps; ++step) {
 		if (step % percent_step == 0) _outputer->outputPercent((float)(100 * step) / steps);
 
 		for (StepFuncs::const_iterator it = step_funcs.begin(); it != step_funcs.end(); ++it) {
 			(this->*(*it))();
 		}
 
-		if (step % out_any_step == 0) _outputer->outputStep();
-
-		_time += _dt;
+		if (step % out_any_step == 0) {
+			_time = (step + 1) * _dt;
+			_outputer->outputStep();
+		}
 	}
 
-	_time -= _dt;
-	_outputer->outputStep();
+	if (step % out_any_step != 0) {
+		_time = (step + 1) * _dt;
+		_outputer->outputStep();
+	}
 	_outputer->outputPercent(100);
 }
 
@@ -242,7 +249,7 @@ void Automata::formingDimers() {
 			if (!direct_n_cell || direct_n_cell->active() == 0 || _dimers.count(direct_n_cell) > 0) continue;
 
 			int3 top_n_coords;
-			Automata::topNeighbourCoords(current_cell->coords(), direct_n_cell->coords(), top_n_coords);
+			topNeighbourCoords(current_cell->coords(), direct_n_cell->coords(), top_n_coords);
 			Cell* top_n_cell = _cells[top_n_coords.z][top_n_coords.y][top_n_coords.x];
 			if (top_n_cell) continue;
 
@@ -447,42 +454,62 @@ void Automata::migratingBridges() {
 
 		int i;
 		for (i = 0; i < 2; ++i) {
-			Cell* direct_n_cell = _cells[direct_n_coords[i].z][direct_n_coords[i].y][direct_n_coords[i].x];
-			if (direct_n_cell) continue;
+			Cell* direct_n_cell = getCell(direct_n_coords[i]);
+			if (!direct_n_cell) {
+				Cell* direct_bottom_n_cells[2];
+				bottomNeighboursCells(direct_n_coords[i], direct_bottom_n_cells);
+				if (!isAvailableForMigrating(direct_bottom_n_cells)) continue;
+				empty_cells_coords.push_back(direct_n_coords[i]);
+			} else if (direct_n_cell->hydro() == 0 && _config["bridge-migration-up-down"]) {
+				Cell* other_direct_n_cell = getCell(direct_n_coords[1-i]);
+				if (other_direct_n_cell || (getCell(across_n_coords[0]) && getCell(across_n_coords[1]))) continue;
 
-			Cell* direct_bottom_n_cells[2];
-			bottomNeighboursCells(direct_n_coords[i], direct_bottom_n_cells);
-			if (!isAvailableForMigrating(direct_bottom_n_cells)) continue;
+				int3 direct_direct_n_coords[2];
+				directNeighboursCoords(direct_n_coords[i], direct_direct_n_coords);
+				Cell* direct_direct_n_cells[2];
+				for (int iddc = 0; iddc < 2; ++iddc) {
+					direct_direct_n_cells[iddc] = getCell(direct_direct_n_coords[iddc]);
+				}
 
-			empty_cells_coords.push_back(direct_n_coords[i]);
+				int3 top_direct_n_coords;
+				if (current_cell == direct_direct_n_cells[0] &&
+						isAvailableForMigrating(direct_n_cell, direct_direct_n_cells[1]))
+				{
+					topNeighbourCoords(direct_n_coords[i], direct_direct_n_coords[1], top_direct_n_coords);
+					if (getCell(top_direct_n_coords)) continue;
+					empty_cells_coords.push_back(top_direct_n_coords);
+
+				} else if (current_cell == direct_direct_n_cells[1] &&
+						isAvailableForMigrating(direct_n_cell, direct_direct_n_cells[0]))
+				{
+					topNeighbourCoords(direct_n_coords[i], direct_direct_n_coords[0], top_direct_n_coords);
+					if (getCell(top_direct_n_coords)) continue;
+					empty_cells_coords.push_back(top_direct_n_coords);
+				}
+			}
 		}
 
 		for (i = 0; i < 2; ++i) {
-			Cell* across_n_cell = _cells[across_n_coords[i].z][across_n_coords[i].y][across_n_coords[i].x];
+			Cell* across_n_cell = getCell(across_n_coords[i]);
 			if (across_n_cell) continue;
 
 			int3 across_bottom_n_coords[2];
 			bottomNeighboursCoords(across_n_coords[i], across_bottom_n_coords);
 			Cell* across_bottom_n_cells[2];
 			for (int iac = 0; iac < 2; ++iac) {
-				across_bottom_n_cells[iac] =
-						_cells[across_bottom_n_coords[iac].z][across_bottom_n_coords[iac].y][across_bottom_n_coords[iac].x];
+				across_bottom_n_cells[iac] = getCell(across_bottom_n_coords[iac]);
 			}
 
 			if (isAvailableForMigrating(across_bottom_n_cells)) {
 				empty_cells_coords.push_back(across_n_coords[i]);
-			} else if (_config["bridge-migration-down"]) {
-				if (bottom_n_cells[0] == across_bottom_n_cells[1] && across_bottom_n_cells[1]->hydro() == 0
-						&& !across_bottom_n_cells[0])
-				{
+			} else if (_config["bridge-migration-up-down"]) {
+				if (!across_bottom_n_cells[0] && across_bottom_n_cells[1]->hydro() == 0) {
 					Cell* bottom_bottom_n_cells[2];
 					bottomNeighboursCells(across_bottom_n_coords[0], bottom_bottom_n_cells);
 					if (isAvailableForMigrating(bottom_bottom_n_cells)) {
 						empty_cells_coords.push_back(across_bottom_n_coords[0]);
 					}
-				} else if (bottom_n_cells[1] == across_bottom_n_cells[0] && across_bottom_n_cells[0]->hydro() == 0
-						&& !across_bottom_n_cells[1])
-				{
+				} else if (!across_bottom_n_cells[1] && across_bottom_n_cells[0]->hydro() == 0) {
 					Cell* bottom_bottom_n_cells[2];
 					bottomNeighboursCells(across_bottom_n_coords[1], bottom_bottom_n_cells);
 					if (isAvailableForMigrating(bottom_bottom_n_cells)) {
@@ -536,16 +563,6 @@ void Automata::activate(Cell* cell) {
 void Automata::deactivate(Cell* cell) {
 	cell->deactivate();
 	if (cell->active() == 0) _actives.erase(cell);
-}
-
-bool Automata::isAvailableForMigrating(Cell* cells[2]) const {
-	return cells[0] && cells[1] && ((cells[0]->active() > 0 && cells[1]->active() > 0) || isDimer(cells));
-}
-
-bool Automata::isDimer(Cell* cells[2]) const {
-	return _dimers.count(cells[0]) > 0 && _dimers.count(cells[1]) > 0
-			&& ((_dimer_bonds.count(cells[0]) > 0 && _dimer_bonds.find(cells[0])->second == cells[1])
-					|| (_dimer_bonds.count(cells[1]) > 0 && _dimer_bonds.find(cells[1])->second == cells[0]));
 }
 
 void Automata::formDimerPart(Cell* cell) {
@@ -651,9 +668,7 @@ void Automata::flatNeighboursCoords(const int3& current_coords, int3 flat_neighb
 void Automata::bottomNeighboursCells(const int3& current_coords, Cell* bottom_neighbours_cells[2]) const {
 	int3 bottom_n_coords[2];
 	bottomNeighboursCoords(current_coords, bottom_n_coords);
-	for (int i = 0; i < 2; ++i) {
-		bottom_neighbours_cells[i] = _cells[bottom_n_coords[i].z][bottom_n_coords[i].y][bottom_n_coords[i].x];
-	}
+	for (int i = 0; i < 2; ++i) bottom_neighbours_cells[i] = getCell(bottom_n_coords[i]);
 }
 
 void Automata::bottomNeighboursCoords(const int3& current_coords, int3 bottom_neighbours_coords[2]) const {

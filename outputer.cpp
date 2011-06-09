@@ -5,7 +5,7 @@
  *      Author: newmen
  */
 
-#include <ctime>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
 
@@ -13,35 +13,37 @@
 
 namespace DiamondCA {
 
-Outputer::Outputer(const FlagsConfig& config, const std::string& prefix) : _config(config) {
+Outputer::Outputer(const Configurator& cg) : _cg(&cg) {
+	_config = _cg->outputerConfig();
+	_start_time = time(0);
+
 	if (!(_config.count("only-info") > 0 && _config.find("only-info")->second)
 			&& !(_config.count("only-specs") > 0 && _config.find("only-specs")->second))
 	{
-		time_t current_time = time(0);
-
+		std::string prefix = _cg->prefix();
 		std::stringstream full_prefix;
 		if (prefix != "") full_prefix << prefix << '-';
 		full_prefix << "out-";
 
 		std::stringstream percent_file_name;
-		percent_file_name << full_prefix.str() << "percent-" << current_time << ".txt";
+		percent_file_name << full_prefix.str() << "percent-" << _start_time << ".txt";
 		_percent_file.open(percent_file_name.str().c_str());
 
 		if (!(_config.count("without-info") == 0 || _config.find("without-info")->second)) {
 			std::stringstream info_file_name;
-			info_file_name << full_prefix.str() << "info-" << current_time << ".txt";
+			info_file_name << full_prefix.str() << "info-" << _start_time << ".txt";
 			_info_file.open(info_file_name.str().c_str());
 		}
 
 		if (!(_config.count("without-area") == 0 || _config.find("without-area")->second)) {
 			std::stringstream area_file_name;
-			area_file_name << full_prefix.str() << "area-" << current_time << ".wxyz";
+			area_file_name << full_prefix.str() << "area-" << _start_time << ".wxyz";
 			_area_file.open(area_file_name.str().c_str());
 		}
 
 		if (_config.count("with-specs") > 0 && _config.find("with-specs")->second) {
 			std::stringstream specs_file_name;
-			specs_file_name << full_prefix.str() << "specs-" << current_time << ".txt";
+			specs_file_name << full_prefix.str() << "specs-" << _start_time << ".txt";
 			_specs_file.open(specs_file_name.str().c_str());
 		}
 	}
@@ -71,7 +73,94 @@ void Outputer::outputStep() {
 			outSpecs(_specs_file);
 		}
 	}
+}
 
+void Outputer::outputConfigInfo(const Handbook& hb) const {
+	std::ostream &oci = std::cout;
+
+	oci << "Используется конфигурационный файл: " << _cg->configFileName() << "\n"
+			<< "Префикс выходных файлов: " << _cg->prefix() << "\n"
+			<< "Постфикс выходных файлов: " << _start_time << "\n"
+			<< "Размеры автомата: X, Y, Z = " << hb.sizes().x << ", " << hb.sizes().y << ", " << hb.sizes().z << "\n"
+			<< "Нижний начальный слой инициализирован: " << _cg->initialSpec() << "\n"
+			<< "Всего шагов по времени: " << _cg->steps() << ", сохранение происходит каждый " << _cg->anyStep() << " шаг\n"
+			<< "Всего рассчитывается " << formatTime(_cg->steps() * hb.dt()) << "процесса, шаг по времени " << hb.dt() << " сек.\n"
+			<< "Температура: " << hb.temperature() << " K\n"
+			<< "Скорость отрыва водорода: " << hb.kMolecule("abs_H") << " 1/сек\n"
+			<< "Скорость осаждения водорода: " << hb.kMolecule("add_H") << " 1/сек\n"
+			<< "Скорость миграции водорода: " << hb.kMolecule("migrate_H") << " 1/сек\n"
+			<< "Скорость отделения метил-радикала: " << hb.kMolecule("add_CH3") << " 1/сек\n"
+			<< "Процент разрываемых димеров: " << hb.percentOfNotDimers() * 100 << "%\n"
+			<< "\n"
+			<< "Образование/разрыв димеров " << (_cg->automataConfig()["dimers-form-drop"] ? "включёно" : "отключёно") << "\n"
+			<< "Миграция водорода " << (_cg->automataConfig()["hydrogen-migration"] ? "включёна" : "отключёна") << "\n"
+			<< "Активация поверхности " << (_cg->automataConfig()["activate-surface"] ? "включёна" : "отключёна") << "\n"
+			<< "Деактивация поверхности " << (_cg->automataConfig()["deactivate-surface"] ? "включёна" : "отключёна") << "\n"
+			<< "Адсорбция метила " << (_cg->automataConfig()["methyl-adsorption"] ? "включёна" : "отключёна") << "\n"
+			<< "Миграция мостовой группы " << (_cg->automataConfig()["bridge-migration"] ? "включёна" : "отключёна") << "\n"
+			<< "Миграция мостовой группы вверх-вниз " << (_cg->automataConfig()["bridge-migration-up-down"] ? "включёна" : "отключёна") << "\n"
+			<< "\n";
+
+	oci << "Файл для визуализации ";
+	if (_config.count("without-area") == 0 || _config.find("without-area")->second) oci << "не ";
+	oci << "сохраняется\n";
+
+	oci << "Инфо ";
+	if (_config.count("without-info") == 0 || _config.find("without-info")->second) oci << "не ";
+	oci << "сохраняется\n";
+
+	oci << "Содержащиеся виды ";
+	if (!(_config.count("with-specs") > 0 && _config.find("with-specs")->second)) oci << "не ";
+	oci << "сохраняются в текстовом виде\n";
+}
+
+void Outputer::outputCalcTime() const {
+	std::ostream &oct = std::cout;
+
+	oct << "\n"
+			<< "Рассчётное время: " << formatTime(time(0) - _start_time) << "\n";
+}
+
+
+#define IN_DAY 86400
+#define IN_HOUR 3600
+#define IN_MINUTE 60
+std::string Outputer::formatTime(float secs) {
+	int days = secs / IN_DAY;
+	secs -= days * IN_DAY;
+	int hours = secs / IN_HOUR;
+	secs -= hours * IN_HOUR;
+	int minutes = secs / IN_MINUTE;
+	secs -= minutes * IN_MINUTE;
+
+	std::stringstream result;
+	if (days > 0) result << humanName(days, "день", "дня", "дней");
+	if (hours > 0) result << humanName(hours, "час", "часа", "часов");
+	if (minutes > 0) result << humanName(minutes, "минута", "минуты", "минут");
+	if (secs > 0 || result.str().length() == 0) result << humanName(secs, "секунда", "секунды", "секунд");
+	return result.str();
+}
+
+std::string Outputer::humanName(float value, const char* one, const char* few, const char* many) {
+	std::stringstream translator;
+	translator << value;
+	int length = translator.str().length();
+
+	int last_two = 0;
+	if (length > 1) last_two = atoi(translator.str().substr(length - 2).c_str());
+
+	int last_one = atoi(translator.str().substr(length - 1).c_str());
+
+	translator << ' ';
+	if (last_two > 10 && last_two < 15) translator << many;
+	else {
+		if (last_one == 1) translator << one;
+		else if (last_one > 1 && last_one < 5) translator << few;
+		else translator << many;
+	}
+
+	translator << ' ';
+	return translator.str();
 }
 
 }

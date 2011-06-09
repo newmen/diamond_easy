@@ -23,7 +23,7 @@ Configurator::Configurator() : _need_help(false), _config_file_name(CONFIG_FILE)
 	_automata_config["deactivate-surface"] = true;
 	_automata_config["methyl-adsorption"] = true;
 	_automata_config["bridge-migration"] = true;
-	_automata_config["bridge-migration-down"] = true;
+	_automata_config["bridge-migration-up-down"] = true;
 
 	_outputer_config["only-info"] = false;
 	_outputer_config["only-specs"] = false;
@@ -49,12 +49,13 @@ void Configurator::parseParams(int argc, char* argv[]) {
 	boost::regex rx_wo_ds("-wo-ds|--without-deactivate-surface");
 	boost::regex rx_wo_ma("-wo-ma|--without-methyl-adsorption");
 	boost::regex rx_wo_bm("-wo-bm|--without-bridge-migration");
-	boost::regex rx_wo_bmd("-wo-bmd|--without-bridge-migration-down");
+	boost::regex rx_wo_bm_ud("-wo-bm-ud|--without-bridge-migration-up-down");
 	boost::regex rx_oi("-oi|--only-info");
 	boost::regex rx_os("-os|--only-specs");
 	boost::regex rx_wo_a("-wo-a|--without-area");
 	boost::regex rx_wo_i("-wo-i|--without-info");
 	boost::regex rx_w_s("-w-s|--with-specs");
+	boost::regex rx_migration_test("--migration-test");
 	boost::regex rx_prefix("^([^-][\\S]*)$");
 
 	for (int i = 1; i < argc; ++i) {
@@ -75,7 +76,7 @@ void Configurator::parseParams(int argc, char* argv[]) {
 		else if (boost::regex_match(current_param, matches, rx_wo_ds)) _automata_config["deactivate-surface"] = false;
 		else if (boost::regex_match(current_param, matches, rx_wo_ma)) _automata_config["methyl-adsorption"] = false;
 		else if (boost::regex_match(current_param, matches, rx_wo_bm)) _automata_config["bridge-migration"] = false;
-		else if (boost::regex_match(current_param, matches, rx_wo_bmd)) _automata_config["bridge-migration-down"] = false;
+		else if (boost::regex_match(current_param, matches, rx_wo_bm_ud)) _automata_config["bridge-migration-up-down"] = false;
 		else if (boost::regex_match(current_param, matches, rx_oi)) _outputer_config["only-info"] = true;
 		else if (boost::regex_match(current_param, matches, rx_os)) _outputer_config["only-specs"] = true;
 		else if (boost::regex_match(current_param, matches, rx_wo_a)) _outputer_config["without-area"] = true;
@@ -93,42 +94,42 @@ void Configurator::parseParams(int argc, char* argv[]) {
 std::string Configurator::help() const {
 	std::stringstream result;
 	result << "Расчёт процесса роста кристалла алмаза CVD методом клеточного автомата\n"
-			<< "(c) 2009-2012 РХТУ им. Д.И. Менделеева, каф. ИКТ, Г.Ю. Аверчук\n\n"
-
+			<< "(c) 2009-2012 РХТУ им. Д.И. Менделеева, каф. ИКТ, Г.Ю. Аверчук\n"
+			<< "\n"
 			<< "Запуск программы:\n"
-			<< "  " << _program_name << " [параметры] [префикс_выходных_файлов]\n\n"
-
+			<< "  " << _program_name << " [параметры] [префикс_выходных_файлов]\n"
+			<< "\n"
 			<< "Параметры:\n"
-			<< "  -h, --help - эта справка\n\n"
-
+			<< "  -h, --help - эта справка\n"
+			<< "\n"
 			<< "  -c=конфигурационный_файл, --config=конфигурационный_файл - задаёт конфигурационный файл "
-			<< "(по умолчанию "<< _config_file_name << ")\n\n"
-
+			<< "(по умолчанию "<< _config_file_name << ")\n"
+			<< "\n"
 			<< "Размеры автомата, заменяют указанные в конфигурационном файле\n"
 			<< "  -x=число, --size-x=число - размер автомата по X\n"
 			<< "  -y=число, --size-x=число - размер автомата по Y\n"
-			<< "  -z=число, --size-x=число - размер автомата по Z\n\n"
-
+			<< "  -z=число, --size-x=число - размер автомата по Z\n"
+			<< "\n"
 			<< "  -is=содержание, --spec=содержание - инициализация нижнего слоя углеродов активными связями и водородом, "
 			<< "общее количество активных связей и водорода должно быть равно двум (по умолчанию "
-			<< _initial_spec << ")\n\n"
-
+			<< _initial_spec << ")\n"
+			<< "\n"
 			<< "  -st=число, --steps=число - число шагов по времени (по умолчанию " << _steps << ")\n"
 			<< "  -as=число, --any-step=число - вывод результатов, когда шаг кратен этому значению"
-			<< "(по умолчанию " << _any_step << ")\n\n"
-
+			<< "(по умолчанию " << _any_step << ")\n"
+			<< "\n"
 			<< "  -wo-dfd, --without-dimers-form-drop - не использовать образование/рызрыв димеров\n"
 			<< "  -wo-hm, --without-hydrogen-migration - не использовать миграцию водорода по димеру\n"
 			<< "  -wo-as, --without-activate-surface - не активировать поверхность водородом газовой фазы\n"
 			<< "  -wo-ds, --without-deactivate-surface - не деактивировать поверхность водородом газовой фазы\n"
 			<< "  -wo-ma, --without-methyl-adsorption - не осаждать метил радикал\n"
 			<< "  -wo-bm, --without-bridge-migration - отменить миграцию мостовой группы\n"
-			<< "  -wo-bmd, --without-bridge-migration-down - отменить миграцию мостовой группы вниз "
-			<< "(миграция вниз не работает без \"обычной\" миграции)\n\n"
-
+			<< "  -wo-bm-ud, --without-bridge-migration-up-down - отменить миграцию мостовой группы вверх-вниз "
+			<< "(миграция вверх-вниз не работает без \"обычной\" миграции)\n"
+			<< "\n"
 			<< "  -oi, --only-info - выводить информацию в стандартный поток вывода и не сохранять выходные файлы\n"
-			<< "  -os, --only-specs - выводить содержащиеся виды в стандартный поток вывода и не сохранять выходные файлы\n\n"
-
+			<< "  -os, --only-specs - выводить содержащиеся виды в стандартный поток вывода и не сохранять выходные файлы\n"
+			<< "\n"
 			<< "  -wo-a, --without-area - не сохранять файл для визуализации\n"
 			<< "  -wo-i, --without-info - не сохранять инфо\n"
 			<< "  -w-s, --with-specs - сохранять содержащиеся виды в текстовом виде\n";

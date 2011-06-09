@@ -36,7 +36,7 @@ public:
 	unsigned int anyStep() const { return _any_step; }
 	FlagsConfig automataConfig() const { return _automata_config; }
 	FlagsConfig outputerConfig() const { return _outputer_config; }
-	std::string prefix() { return _prefix; }
+	std::string prefix() const { return _prefix; }
 
 	std::string help() const;
 
