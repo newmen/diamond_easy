@@ -456,65 +456,87 @@ void Automata::migratingBridges() {
 		for (i = 0; i < 2; ++i) {
 			Cell* direct_n_cell = getCell(direct_n_coords[i]);
 			if (!direct_n_cell) {
+				int3 direct_bottom_n_coords[2];
+				bottomNeighboursCoords(direct_n_coords[i], direct_bottom_n_coords);
 				Cell* direct_bottom_n_cells[2];
-				bottomNeighboursCells(direct_n_coords[i], direct_bottom_n_cells);
-				if (!isAvailableForMigrating(direct_bottom_n_cells)) continue;
-				empty_cells_coords.push_back(direct_n_coords[i]);
-			} else if (direct_n_cell->hydro() == 0 && _config["bridge-migration-up-down"]) {
+				for (int idc = 0; idc < 2; ++idc) direct_bottom_n_cells[idc] = getCell(direct_bottom_n_coords[idc]);
+
+//				if (direct_bottom_n_cells[0] && direct_bottom_n_cells[1] && isDimer(direct_bottom_n_cells)) {
+				if (isAvailableForMigrating(direct_bottom_n_cells)) {
+					empty_cells_coords.push_back(direct_n_coords[i]);
+				} else if (_config["bridge-migration-up-down"]) {
+					// миграция вниз
+					for (int ibc = 0; ibc < 2; ++ibc) {
+						if (direct_bottom_n_cells[ibc] || bottom_n_cells[ibc]->active() != 1) continue;
+						Cell* bottom_bottom_n_cells[2];
+						bottomNeighboursCells(direct_bottom_n_coords[ibc], bottom_bottom_n_cells);
+						if (!isAvailableForMigrating(bottom_bottom_n_cells)) continue;
+						empty_cells_coords.push_back(direct_bottom_n_coords[ibc]);
+					}
+				}
+			} else if (direct_n_cell->hydro() == 0 && direct_n_cell->active() == 1 &&
+					_config["bridge-migration-up-down"])
+			{
+				// миграция вверх
 				Cell* other_direct_n_cell = getCell(direct_n_coords[1-i]);
 				if (other_direct_n_cell || (getCell(across_n_coords[0]) && getCell(across_n_coords[1]))) continue;
 
 				int3 direct_direct_n_coords[2];
 				directNeighboursCoords(direct_n_coords[i], direct_direct_n_coords);
 				Cell* direct_direct_n_cells[2];
-				for (int iddc = 0; iddc < 2; ++iddc) {
-					direct_direct_n_cells[iddc] = getCell(direct_direct_n_coords[iddc]);
-				}
-
-				int3 top_direct_n_coords;
-				if (current_cell == direct_direct_n_cells[0] &&
-						isAvailableForMigrating(direct_n_cell, direct_direct_n_cells[1]))
-				{
-					topNeighbourCoords(direct_n_coords[i], direct_direct_n_coords[1], top_direct_n_coords);
-					if (getCell(top_direct_n_coords)) continue;
-					empty_cells_coords.push_back(top_direct_n_coords);
-
-				} else if (current_cell == direct_direct_n_cells[1] &&
-						isAvailableForMigrating(direct_n_cell, direct_direct_n_cells[0]))
-				{
-					topNeighbourCoords(direct_n_coords[i], direct_direct_n_coords[0], top_direct_n_coords);
-					if (getCell(top_direct_n_coords)) continue;
-					empty_cells_coords.push_back(top_direct_n_coords);
+				int iddc;
+				for (iddc = 0; iddc < 2; ++iddc) direct_direct_n_cells[iddc] = getCell(direct_direct_n_coords[iddc]);
+				for (iddc = 0; iddc < 2; ++iddc) {
+					if (current_cell == direct_direct_n_cells[1-iddc] &&
+							isAvailableForMigrating(direct_n_cell, direct_direct_n_cells[iddc]))
+					{
+						int3 top_direct_n_coords;
+						topNeighbourCoords(direct_n_coords[i], direct_direct_n_coords[iddc], top_direct_n_coords);
+						if (!getCell(top_direct_n_coords)) empty_cells_coords.push_back(top_direct_n_coords);
+					}
 				}
 			}
 		}
 
 		for (i = 0; i < 2; ++i) {
 			Cell* across_n_cell = getCell(across_n_coords[i]);
-			if (across_n_cell) continue;
+			if (!across_n_cell) {
+				int3 across_bottom_n_coords[2];
+				bottomNeighboursCoords(across_n_coords[i], across_bottom_n_coords);
+				Cell* across_bottom_n_cells[2];
+				for (int iac = 0; iac < 2; ++iac) across_bottom_n_cells[iac] = getCell(across_bottom_n_coords[iac]);
 
-			int3 across_bottom_n_coords[2];
-			bottomNeighboursCoords(across_n_coords[i], across_bottom_n_coords);
-			Cell* across_bottom_n_cells[2];
-			for (int iac = 0; iac < 2; ++iac) {
-				across_bottom_n_cells[iac] = getCell(across_bottom_n_coords[iac]);
-			}
+				if (isAvailableForMigrating(across_bottom_n_cells)) {
+					empty_cells_coords.push_back(across_n_coords[i]);
+				} else if (_config["bridge-migration-up-down"]) {
+					// миграция вниз
+					for (int iabc = 0; iabc < 2; ++iabc) {
+						if (across_bottom_n_cells[iabc] || across_bottom_n_cells[1-iabc]->hydro() != 0) continue;
 
-			if (isAvailableForMigrating(across_bottom_n_cells)) {
-				empty_cells_coords.push_back(across_n_coords[i]);
-			} else if (_config["bridge-migration-up-down"]) {
-				if (!across_bottom_n_cells[0] && across_bottom_n_cells[1]->hydro() == 0) {
-					Cell* bottom_bottom_n_cells[2];
-					bottomNeighboursCells(across_bottom_n_coords[0], bottom_bottom_n_cells);
-					if (isAvailableForMigrating(bottom_bottom_n_cells)) {
-						empty_cells_coords.push_back(across_bottom_n_coords[0]);
+						Cell* bottom_bottom_n_cells[2];
+						bottomNeighboursCells(across_bottom_n_coords[iabc], bottom_bottom_n_cells);
+						if (isAvailableForMigrating(bottom_bottom_n_cells)) {
+							empty_cells_coords.push_back(across_bottom_n_coords[iabc]);
+						}
 					}
-				} else if (!across_bottom_n_cells[1] && across_bottom_n_cells[0]->hydro() == 0) {
-					Cell* bottom_bottom_n_cells[2];
-					bottomNeighboursCells(across_bottom_n_coords[1], bottom_bottom_n_cells);
-					if (isAvailableForMigrating(bottom_bottom_n_cells)) {
-						empty_cells_coords.push_back(across_bottom_n_coords[1]);
-					}
+				}
+			} else if (across_n_cell->hydro() == 0 && across_n_cell->active() == 1 &&
+					_config["bridge-migration-up-down"])
+			{
+				// миграция вверх
+				Cell* other_across_n_cell = getCell(across_n_coords[1-i]);
+				if (other_across_n_cell || (getCell(direct_n_coords[0]) && getCell(direct_n_coords[1]))) continue;
+
+				int3 direct_across_n_coords[2];
+				directNeighboursCoords(across_n_coords[i], direct_across_n_coords);
+				Cell* direct_across_n_cells[2];
+				int idac;
+				for (idac = 0; idac < 2; ++idac) direct_across_n_cells[idac] = getCell(direct_across_n_coords[idac]);
+				for (idac = 0; idac < 2; ++idac) {
+					if (!isAvailableForMigrating(across_n_cell, direct_across_n_cells[idac])) continue;
+					int3 top_direct_across_n_coords;
+					topNeighbourCoords(across_n_coords[i], direct_across_n_coords[idac], top_direct_across_n_coords);
+					if (!getCell(top_direct_across_n_coords)) empty_cells_coords.push_back(top_direct_across_n_coords);
 				}
 			}
 		}

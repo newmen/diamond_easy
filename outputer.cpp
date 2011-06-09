@@ -5,10 +5,12 @@
  *      Author: newmen
  */
 
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <sstream>
 
+#include "cell.h"
 #include "outputer.h"
 
 namespace DiamondCA {
@@ -78,11 +80,22 @@ void Outputer::outputStep() {
 void Outputer::outputConfigInfo(const Handbook& hb) const {
 	std::ostream &oci = std::cout;
 
+	const double rad = M_PI / 180;
+	const double cc_bond_length = 0.15e-9; // метров
+	const double ccc_angle = 109.28; // градусов
+	const double level_width = cc_bond_length * cos(rad * ccc_angle * 0.5);
+
+	const Cell info_cell(_cg->initialSpec(), 0, 0, 0);
+
 	oci << "Используется конфигурационный файл: " << _cg->configFileName() << "\n"
 			<< "Префикс выходных файлов: " << _cg->prefix() << "\n"
 			<< "Постфикс выходных файлов: " << _start_time << "\n"
-			<< "Размеры автомата: X, Y, Z = " << hb.sizes().x << ", " << hb.sizes().y << ", " << hb.sizes().z << "\n"
-			<< "Нижний начальный слой инициализирован: " << _cg->initialSpec() << "\n"
+			<< "Размеры автомата (в клетках): X = " << hb.sizes().x << ", Y = " << hb.sizes().y << ", Z = " << hb.sizes().z << "\n"
+//			<< "Расстояние между слоями атомов: " << level_width << " м.\n"
+//			<< "Размер по X: " << hb.sizes().x * level_width * 1e9 << " нм.\n"
+//			<< "Размер по Y: " << hb.sizes().y * level_width * 1e9 << " нм.\n"
+			<< "Площадь подложки: " << (hb.sizes().x * level_width) * (hb.sizes().y * level_width) * 1e18 << " кв.нм.\n"
+			<< "Нижний начальный слой инициализирован: " << info_cell.spec() << "\n"
 			<< "Всего шагов по времени: " << _cg->steps() << ", сохранение происходит каждый " << _cg->anyStep() << " шаг\n"
 			<< "Всего рассчитывается " << formatTime(_cg->steps() * hb.dt()) << "процесса, шаг по времени " << hb.dt() << " сек.\n"
 			<< "Температура: " << hb.temperature() << " K\n"
@@ -116,9 +129,7 @@ void Outputer::outputConfigInfo(const Handbook& hb) const {
 
 void Outputer::outputCalcTime() const {
 	std::ostream &oct = std::cout;
-
-	oct << "\n"
-			<< "Рассчётное время: " << formatTime(time(0) - _start_time) << "\n";
+	oct << "\nРассчётное время: " << formatTime(time(0) - _start_time) << std::endl;
 }
 
 
