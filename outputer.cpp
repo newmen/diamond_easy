@@ -137,11 +137,11 @@ void Outputer::outputCalcTime() const {
 #define IN_HOUR 3600
 #define IN_MINUTE 60
 std::string Outputer::formatTime(float secs) {
-	int days = secs / IN_DAY;
+	int days = (int)(secs / IN_DAY);
 	secs -= days * IN_DAY;
-	int hours = secs / IN_HOUR;
+	int hours = (int)(secs / IN_HOUR);
 	secs -= hours * IN_HOUR;
-	int minutes = secs / IN_MINUTE;
+	int minutes = (int)(secs / IN_MINUTE);
 	secs -= minutes * IN_MINUTE;
 
 	std::stringstream result;
