@@ -2,9 +2,10 @@
 
 run_task=$1
 result_dir=$2
+prefix=$3
 
 if [ "${run_task}" = "" ] || [ "${result_dir}" = "" ]; then
-    echo "Usage: $0 full_run_taks_path full_result_dir_path"
+    echo "Usage: $0 full_run_taks_path full_result_dir_path prefix"
     exit 1
 fi
 
@@ -13,11 +14,15 @@ if [ ! -f ${run_task} ]; then
     exit 1
 fi
 
+if [ "${prefix}" = "" ]; then
+    echo "Prefix cannot be blank!"
+    exit 1
+fi
+
 if [ ! -d ${result_dir} ]; then
     mkdir -p ${result_dir}
 fi
 
-prefix='diamond'
 curr_time=`date +%s`
 rand=$RANDOM
 
