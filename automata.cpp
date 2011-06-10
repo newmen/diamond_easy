@@ -212,7 +212,7 @@ void Automata::run(unsigned int steps, unsigned int out_any_step) {
 	_outputer->outputStep();
 
 	unsigned int step = 0;
-	for ( ; step < steps; ++step) {
+	for ( ; step < steps + 1; ++step) {
 		if (step % percent_step == 0) _outputer->outputPercent((float)(100 * step) / steps);
 
 		for (StepFuncs::const_iterator it = step_funcs.begin(); it != step_funcs.end(); ++it) {
@@ -225,10 +225,6 @@ void Automata::run(unsigned int steps, unsigned int out_any_step) {
 		}
 	}
 
-	if (step % out_any_step != 0) {
-		_time = (step + 1) * _dt;
-		_outputer->outputStep();
-	}
 	_outputer->outputPercent(100);
 }
 

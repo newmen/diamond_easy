@@ -84,7 +84,7 @@ double Handbook::kMolecule(const std::string& key) const {
 
 	if (key == "abs_H" || key == "add_H" || key == "add_CH3") {
 		VarVal concentrations_section = _params.find("concentrations")->second;
-		double concentration;
+		double concentration = 0;
 		if (key == "abs_H" || key == "add_H") {
 			concentration = concentrations_section.find("H")->second;
 		} else if (key == "add_CH3") {
