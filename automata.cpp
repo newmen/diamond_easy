@@ -437,12 +437,23 @@ void Automata::migratingBridges() {
 
 		VariantCoords empty_cells_coords;
 
+		int i;
 		int3 flat_n_coords[2][2];
 		flatNeighboursCoords(current_coords, flat_n_coords);
+
+		// если есть 2 соседа в плоскости - не мигрирует
+		int nn = 0;
+		for (i = 0; i < 2; ++i) {
+			for (int j = 0; j < 2; ++j) {
+				if (!getCell(flat_n_coords[i][j])) continue;
+				++nn;
+			}
+		}
+		if (nn > 1) continue;
+
 		int3* direct_n_coords = flat_n_coords[0];
 		int3* across_n_coords = flat_n_coords[1];
 
-		int i;
 		for (i = 0; i < 2; ++i) {
 			Cell* direct_n_cell = getCell(direct_n_coords[i]);
 			if (!direct_n_cell) {
@@ -468,8 +479,8 @@ void Automata::migratingBridges() {
 					_config["bridge-migration-up-down"])
 			{
 				// миграция вверх
-				Cell* other_direct_n_cell = getCell(direct_n_coords[1-i]);
-				if (other_direct_n_cell || (getCell(across_n_coords[0]) && getCell(across_n_coords[1]))) continue;
+//				Cell* other_direct_n_cell = getCell(direct_n_coords[1-i]);
+//				if (other_direct_n_cell || (getCell(across_n_coords[0]) && getCell(across_n_coords[1]))) continue;
 
 				int3 direct_direct_n_coords[2];
 				directNeighboursCoords(direct_n_coords[i], direct_direct_n_coords);
@@ -514,8 +525,8 @@ void Automata::migratingBridges() {
 					_config["bridge-migration-up-down"])
 			{
 				// миграция вверх
-				Cell* other_across_n_cell = getCell(across_n_coords[1-i]);
-				if (other_across_n_cell || (getCell(direct_n_coords[0]) && getCell(direct_n_coords[1]))) continue;
+//				Cell* other_across_n_cell = getCell(across_n_coords[1-i]);
+//				if (other_across_n_cell || (getCell(direct_n_coords[0]) && getCell(direct_n_coords[1]))) continue;
 
 				int3 direct_across_n_coords[2];
 				directNeighboursCoords(across_n_coords[i], direct_across_n_coords);
