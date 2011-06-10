@@ -223,7 +223,7 @@ void Automata::run(unsigned int steps, unsigned int out_any_step) {
 
 //	_time = step * _dt;
 //	_outputer->outputStep();
-	_outputer->outputPercent(100);
+//	_outputer->outputPercent(100);
 }
 
 void Automata::formingDimers() {
