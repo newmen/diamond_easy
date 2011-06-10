@@ -36,7 +36,7 @@ void Configurator::parseParams(int argc, char* argv[]) {
 	_program_name = argv[0];
 
 	boost::regex rx_help("-h|--help");
-	boost::regex rx_config_file_name("(-c|--config)=([\\w\\.-]+)");
+	boost::regex rx_config_file_name("(-c|--config)=([\\/\\w\\._-]+)");
 	boost::regex rx_size_x("(-x|--size-x)=(\\d+)");
 	boost::regex rx_size_y("(-y|--size-y)=(\\d+)");
 	boost::regex rx_size_z("(-z|--size-z)=(\\d+)");
