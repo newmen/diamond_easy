@@ -3,14 +3,18 @@
 run_task=$1
 result_dir=$2
 
+if [ "${run_task}" = "" ] || [ "${result_dir}" = "" ]; then
+    echo "Usage: $0 full_run_taks_path full_result_dir_path"
+    exit 1
+fi
+
 if [ ! -f ${run_task} ]; then
-    echo "Calculation program '${run_task}' does not exists!"
-    exit 1;
+    echo "Calculation program '${run_task}' does not exist!"
+    exit 1
 fi
 
 if [ ! -d ${result_dir} ]; then
-    echo "Result directory '${result_dir}' does not exists!"
-    exit 1;
+    mkdir -p ${result_dir}
 fi
 
 prefix='diamond'
