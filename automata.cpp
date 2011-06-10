@@ -220,10 +220,6 @@ void Automata::run(unsigned int steps, unsigned int out_any_step) {
 			(this->*(*it))();
 		}
 	}
-
-//	_time = step * _dt;
-//	_outputer->outputStep();
-//	_outputer->outputPercent(100);
 }
 
 void Automata::formingDimers() {
