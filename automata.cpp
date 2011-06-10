@@ -208,23 +208,21 @@ void Automata::run(unsigned int steps, unsigned int out_any_step) {
 
 	srand(time(0));
 
-	_time = 0;
-	_outputer->outputStep();
-
 	unsigned int step = 0;
-	for ( ; step < steps + 1; ++step) {
+	for ( ; step <= steps; ++step) {
 		if (step % percent_step == 0) _outputer->outputPercent((float)(100 * step) / steps);
+		if (step % out_any_step == 0) {
+			_time = step * _dt;
+			_outputer->outputStep();
+		}
 
 		for (StepFuncs::const_iterator it = step_funcs.begin(); it != step_funcs.end(); ++it) {
 			(this->*(*it))();
 		}
-
-		if (step % out_any_step == 0) {
-			_time = (step + 1) * _dt;
-			_outputer->outputStep();
-		}
 	}
 
+//	_time = step * _dt;
+//	_outputer->outputStep();
 	_outputer->outputPercent(100);
 }
 
