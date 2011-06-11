@@ -116,10 +116,10 @@ private:
 	int _max_z;
 	int _carbons_num;
 	int _hydrogen_atoms_num;
+	int _active_dimers_num;
 	int _active_bonds_num;
 //	int _active_bridges_num;
 	int _bridges_num;
-	int _active_dimers_num;
 	int _abstracted_hydrogen_atoms_num;
 	int _adsorbed_hydrogen_atoms_num;
 	int _adsorbed_methyl_radicals_num;

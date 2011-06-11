@@ -22,10 +22,11 @@ typedef std::vector<int3> VariantCoords;
 
 Automata::Automata(const Handbook& handbook, const FlagsConfig& config, Outputer& outputer) :
 		_config(config), _outputer(&outputer),
-		_hydrogen_atoms_num(0), _active_bonds_num(0),
+		_hydrogen_atoms_num(0),
+		_active_dimers_num(0),
+		_active_bonds_num(0),
 //		_active_bridges_num(0),
 		_bridges_num(0),
-		_active_dimers_num(0),
 		_abstracted_hydrogen_atoms_num(0), _adsorbed_hydrogen_atoms_num(0), _adsorbed_methyl_radicals_num(0),
 		_migrated_hydrogen_atoms_num(0), _migrated_bridges_num(0)
 {
@@ -452,15 +453,15 @@ void Automata::migratingBridges() {
 		int3 flat_n_coords[2][2];
 		flatNeighboursCoords(current_coords, flat_n_coords);
 
-		// если есть 2 соседа в плоскости - не мигрирует
-		int nn = 0;
-		for (i = 0; i < 2; ++i) {
-			for (int j = 0; j < 2; ++j) {
-				if (!getCell(flat_n_coords[i][j])) continue;
-				++nn;
-			}
-		}
-		if (nn > 1) continue;
+//		// если есть 2 соседа в плоскости - не мигрирует
+//		int nn = 0;
+//		for (i = 0; i < 2; ++i) {
+//			for (int j = 0; j < 2; ++j) {
+//				if (!getCell(flat_n_coords[i][j])) continue;
+//				++nn;
+//			}
+//		}
+//		if (nn > 1) continue;
 
 		int3* direct_n_coords = flat_n_coords[0];
 		int3* across_n_coords = flat_n_coords[1];
@@ -490,8 +491,8 @@ void Automata::migratingBridges() {
 					_config["bridge-migration-up-down"])
 			{
 				// миграция вверх
-//				Cell* other_direct_n_cell = getCell(direct_n_coords[1-i]);
-//				if (other_direct_n_cell || (getCell(across_n_coords[0]) && getCell(across_n_coords[1]))) continue;
+				Cell* other_direct_n_cell = getCell(direct_n_coords[1-i]);
+				if (other_direct_n_cell || (getCell(across_n_coords[0]) && getCell(across_n_coords[1]))) continue;
 
 				int3 direct_direct_n_coords[2];
 				directNeighboursCoords(direct_n_coords[i], direct_direct_n_coords);
@@ -537,8 +538,8 @@ void Automata::migratingBridges() {
 					_config["bridge-migration-up-down"])
 			{
 				// миграция вверх
-//				Cell* other_across_n_cell = getCell(across_n_coords[1-i]);
-//				if (other_across_n_cell || (getCell(direct_n_coords[0]) && getCell(direct_n_coords[1]))) continue;
+				Cell* other_across_n_cell = getCell(across_n_coords[1-i]);
+				if (other_across_n_cell || (getCell(direct_n_coords[0]) && getCell(direct_n_coords[1]))) continue;
 
 				int3 direct_across_n_coords[2];
 				directNeighboursCoords(across_n_coords[i], direct_across_n_coords);
