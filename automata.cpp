@@ -183,8 +183,14 @@ void Automata::exploreArea() {
 
 				++_carbons_num;
 				if (iz > _max_z) _max_z = iz;
-				if (_cells[iz][iy][ix]->active() > 0) _actives.insert(_cells[iz][iy][ix]);
-				if (_cells[iz][iy][ix]->hydro() > 0) _hydrides.insert(_cells[iz][iy][ix]);
+				if (_cells[iz][iy][ix]->active() > 0) {
+					_actives.insert(_cells[iz][iy][ix]);
+					_active_bonds_num += _cells[iz][iy][ix]->active();
+				}
+				if (_cells[iz][iy][ix]->hydro() > 0) {
+					_hydrides.insert(_cells[iz][iy][ix]);
+					_hydrogen_atoms_num += _cells[iz][iy][ix]->hydro();
+				}
 			}
 		}
 	}
