@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 	ca.stickToCells("*", RangeOfCells(1, 1), RangeOfCells(7, 8), RangeOfCells(7, 8));
 	ca.stickToCells("*", RangeOfCells(2, 2), RangeOfCells(7, 8), RangeOfCells(7, 7));
 	ca.stickToCells("*H", RangeOfCells(3, 3), RangeOfCells(8, 8), RangeOfCells(7, 7));
-	ca.run(configurator.steps(), configurator.anyStep());
+	ca.run(configurator.fullTime(), configurator.anyTime());
 
 	outputer.outputCalcTime();
 

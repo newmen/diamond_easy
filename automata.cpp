@@ -190,7 +190,11 @@ void Automata::exploreArea() {
 	}
 }
 
-void Automata::run(unsigned int steps, unsigned int out_any_step) {
+void Automata::run(float full_time, float out_any_time) {
+	unsigned int steps = (unsigned int)(full_time / _dt + 0.5);
+	unsigned int out_any_step = 1;
+	if (out_any_time > 0) out_any_step = (unsigned int)(out_any_time / _dt + 0.5);
+
 	exploreArea();
 
 	typedef void (Automata::*StepFunc)();

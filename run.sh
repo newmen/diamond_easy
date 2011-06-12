@@ -30,6 +30,6 @@ tmp_dirpath="/tmp/${prefix}-${curr_time}-${rand}"
 
 mkdir ${tmp_dirpath}
 cd ${tmp_dirpath}
-${run_task} > ${prefix}.out
+${run_task}
 mv * ${result_dir}
 rm -rf ${tmp_dirpath}

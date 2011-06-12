@@ -41,7 +41,7 @@ public:
 	std::string infoHead() const;
 	std::string infoBody() const;
 
-	void run(unsigned int steps, unsigned int out_any_step = 1);
+	void run(float full_time, float out_any_time = 0);
 
 private:
 	Automata() { }

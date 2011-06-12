@@ -15,7 +15,10 @@
 namespace DiamondCA {
 
 Configurator::Configurator() : _need_help(false), _config_file_name(CONFIG_FILE),
-		_initial_spec(INITIAL_SPEC), _steps(STEPS), _any_step(ANY_STEP), _prefix("")
+		_initial_spec(INITIAL_SPEC),
+//		_steps(STEPS), _any_step(ANY_STEP),
+		_full_time(FULL_TIME), _any_time(ANY_TIME),
+		_prefix("")
 {
 	_automata_config["dimers-form-drop"] = true;
 	_automata_config["hydrogen-migration"] = true;
@@ -42,8 +45,10 @@ void Configurator::parseParams(int argc, char* argv[]) {
 	boost::regex rx_size_y("(-y|--size-y)=(\\d+)");
 	boost::regex rx_size_z("(-z|--size-z)=(\\d+)");
 	boost::regex rx_spec("(-is|--spec)=([*H]{2})");
-	boost::regex rx_steps("(-st|--steps)=(\\d+)");
-	boost::regex rx_any_step("(-as|--any-step)=(\\d+)");
+//	boost::regex rx_steps("(-st|--steps)=(\\d+)");
+//	boost::regex rx_any_step("(-as|--any-step)=(\\d+)");
+	boost::regex rx_ft("(-ft|--full-time)=([\\d\\.]+)");
+	boost::regex rx_at("(-at|--any-time)=([\\d\\.]+)");
 	boost::regex rx_wo_dfd("-wo-dfd|--without-dimers-form-drop");
 	boost::regex rx_wo_hm("-wo-hm|--without-hydrogen-migration");
 	boost::regex rx_wo_as("-wo-as|--without-activate-surface");
@@ -70,8 +75,10 @@ void Configurator::parseParams(int argc, char* argv[]) {
 		else if (boost::regex_match(current_param, matches, rx_size_y)) _sizes.y = atoi(matches[2].str().c_str());
 		else if (boost::regex_match(current_param, matches, rx_size_z)) _sizes.z = atoi(matches[2].str().c_str());
 		else if (boost::regex_match(current_param, matches, rx_spec)) _initial_spec = matches[2];
-		else if (boost::regex_match(current_param, matches, rx_steps)) _steps = atoi(matches[2].str().c_str());
-		else if (boost::regex_match(current_param, matches, rx_any_step)) _any_step = atoi(matches[2].str().c_str());
+//		else if (boost::regex_match(current_param, matches, rx_steps)) _steps = atoi(matches[2].str().c_str());
+//		else if (boost::regex_match(current_param, matches, rx_any_step)) _any_step = atoi(matches[2].str().c_str());
+		else if (boost::regex_match(current_param, matches, rx_ft)) _full_time = atof(matches[2].str().c_str());
+		else if (boost::regex_match(current_param, matches, rx_at)) _any_time = atof(matches[2].str().c_str());
 		else if (boost::regex_match(current_param, matches, rx_wo_dfd)) _automata_config["dimers-form-drop"] = false;
 		else if (boost::regex_match(current_param, matches, rx_wo_hm)) _automata_config["hydrogen-migration"] = false;
 		else if (boost::regex_match(current_param, matches, rx_wo_as)) _automata_config["activate-surface"] = false;
@@ -117,9 +124,13 @@ std::string Configurator::help() const {
 			<< "общее количество активных связей и водорода должно быть равно двум (по умолчанию "
 			<< _initial_spec << ")\n"
 			<< "\n"
-			<< "  -st=число, --steps=число - число шагов по времени (по умолчанию " << _steps << ")\n"
-			<< "  -as=число, --any-step=число - вывод результатов, когда шаг кратен этому значению"
-			<< "(по умолчанию " << _any_step << ")\n"
+//			<< "  -st=число, --steps=число - число шагов по времени (по умолчанию " << _steps << ")\n"
+//			<< "  -as=число, --any-step=число - вывод результатов, когда шаг кратен этому значению"
+//			<< "(по умолчанию " << _any_step << ")\n"
+			<< "  -ft=число, --full-time=число - количество рассчитываемых секунд процесса (по умолчанию "
+			<< _full_time << ")\n"
+			<< "  -at=число, --any-time=число - вывод результатов, когда время кратно этому значению секунд (по умолчанию "
+			<< _any_time << ")\n"
 			<< "\n"
 			<< "  -wo-dfd, --without-dimers-form-drop - не использовать образование/рызрыв димеров\n"
 			<< "  -wo-hm, --without-hydrogen-migration - не использовать миграцию водорода по димеру\n"
