@@ -79,7 +79,7 @@ private:
 						|| (_dimer_bonds.count(cells[1]) > 0 && _dimer_bonds.find(cells[1])->second == cells[0]));
 	}
 
-	bool isCanDirectMigrating(Cell* cell, const int3& to_coords);
+//	bool isCanDirectMigrating(Cell* cell, const int3& to_coords);
 
 	void activate(Cell* cell);
 	void deactivate(Cell* cell);
@@ -118,8 +118,8 @@ private:
 	int _hydrogen_atoms_num;
 	int _active_dimers_num;
 	int _active_bonds_num;
-//	int _active_bridges_num;
-	int _bridges_num;
+	int _active_bridges_num;
+//	int _bridges_num;
 	int _abstracted_hydrogen_atoms_num;
 	int _adsorbed_hydrogen_atoms_num;
 	int _adsorbed_methyl_radicals_num;

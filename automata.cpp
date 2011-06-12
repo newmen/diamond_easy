@@ -25,8 +25,8 @@ Automata::Automata(const Handbook& handbook, const FlagsConfig& config, Outputer
 		_hydrogen_atoms_num(0),
 		_active_dimers_num(0),
 		_active_bonds_num(0),
-//		_active_bridges_num(0),
-		_bridges_num(0),
+		_active_bridges_num(0),
+//		_bridges_num(0),
 		_abstracted_hydrogen_atoms_num(0), _adsorbed_hydrogen_atoms_num(0), _adsorbed_methyl_radicals_num(0),
 		_migrated_hydrogen_atoms_num(0), _migrated_bridges_num(0)
 {
@@ -143,8 +143,8 @@ std::string Automata::infoHead() const {
 			<< "\tTotal dimers"
 			<< "\tTotal active dimers"
 			<< "\tTotal active bonds"
-//			<< "\tTotal active bridges"
-			<< "\tTotal bridges"
+			<< "\tTotal active bridges"
+//			<< "\tTotal bridges"
 			<< "\tAbstracted hydrogen atoms"
 			<< "\tAdsorbed hydrogen atoms"
 			<< "\tAdsorbed methyl radicals"
@@ -163,8 +163,8 @@ std::string Automata::infoBody() const {
 			<< '\t' << _dimer_bonds.size()
 			<< '\t' << _active_dimers_num
 			<< '\t' << _active_bonds_num
-//			<< '\t' << _active_bridges_num
-			<< '\t' << _bridges_num
+			<< '\t' << _active_bridges_num
+//			<< '\t' << _bridges_num
 			<< '\t' << _abstracted_hydrogen_atoms_num
 			<< '\t' << _adsorbed_hydrogen_atoms_num
 			<< '\t' << _adsorbed_methyl_radicals_num
@@ -427,20 +427,20 @@ void Automata::addingBridges() {
 }
 
 void Automata::migratingBridges() {
-//	SetOfCells* actives_not_dimer = differentCells(_actives, _dimers);
-	SetOfCells* surface_cells = unionCells(_actives, _hydrides);
-	SetOfCells* bridge_cells = differentCells(*surface_cells, _dimers);
-	delete surface_cells;
+	SetOfCells* actives_not_dimer = differentCells(_actives, _dimers);
+//	SetOfCells* surface_cells = unionCells(_actives, _hydrides);
+//	SetOfCells* bridge_cells = differentCells(*surface_cells, _dimers);
+//	delete surface_cells;
 
-//	_active_bridges_num = 0;
-	_bridges_num = 0;
+	_active_bridges_num = 0;
+//	_bridges_num = 0;
 	_migrated_bridges_num = 0;
-//	for (SetOfCells::iterator it = actives_not_dimer->begin(); it != actives_not_dimer->end(); ++it) {
-	for (SetOfCells::iterator it = bridge_cells->begin(); it != bridge_cells->end(); ++it) {
+	for (SetOfCells::iterator it = actives_not_dimer->begin(); it != actives_not_dimer->end(); ++it) {
+//	for (SetOfCells::iterator it = bridge_cells->begin(); it != bridge_cells->end(); ++it) {
 		Cell* current_cell = *it;
 		if (!(current_cell->active() + current_cell->hydro() > 1)) continue;
-//		++_active_bridges_num;
-		++_bridges_num;
+		++_active_bridges_num;
+//		++_bridges_num;
 
 		int3 current_coords = current_cell->coords();
 
@@ -483,7 +483,7 @@ void Automata::migratingBridges() {
 						Cell* bottom_bottom_n_cells[2];
 						bottomNeighboursCells(direct_bottom_n_coords[ibc], bottom_bottom_n_cells);
 						if (!isAvailableForMigrating(bottom_bottom_n_cells)) continue;
-						if (!isCanDirectMigrating(current_cell, direct_bottom_n_coords[ibc])) continue;
+//						if (!isCanDirectMigrating(current_cell, direct_bottom_n_coords[ibc])) continue;
 						empty_cells_coords.push_back(direct_bottom_n_coords[ibc]);
 					}
 				}
@@ -520,7 +520,7 @@ void Automata::migratingBridges() {
 				for (int iac = 0; iac < 2; ++iac) across_bottom_n_cells[iac] = getCell(across_bottom_n_coords[iac]);
 
 				if (isAvailableForMigrating(across_bottom_n_cells)) {
-					if (!isCanDirectMigrating(current_cell, across_n_coords[i])) continue;
+//					if (!isCanDirectMigrating(current_cell, across_n_coords[i])) continue;
 					empty_cells_coords.push_back(across_n_coords[i]);
 				} else if (_config["bridge-migration-up-down"]) {
 					// миграция вниз
@@ -529,9 +529,8 @@ void Automata::migratingBridges() {
 
 						Cell* bottom_bottom_n_cells[2];
 						bottomNeighboursCells(across_bottom_n_coords[iabc], bottom_bottom_n_cells);
-						if (isAvailableForMigrating(bottom_bottom_n_cells)) {
-							empty_cells_coords.push_back(across_bottom_n_coords[iabc]);
-						}
+						if (!isAvailableForMigrating(bottom_bottom_n_cells)) continue;
+						empty_cells_coords.push_back(across_bottom_n_coords[iabc]);
 					}
 				}
 			} else if (across_n_cell->hydro() == 0 && across_n_cell->active() == 1 &&
@@ -551,7 +550,7 @@ void Automata::migratingBridges() {
 					int3 top_direct_across_n_coords;
 					topNeighbourCoords(across_n_coords[i], direct_across_n_coords[idac], top_direct_across_n_coords);
 					if (getCell(top_direct_across_n_coords)) continue;
-					if (!isCanDirectMigrating(current_cell, top_direct_across_n_coords)) continue;
+//					if (!isCanDirectMigrating(current_cell, top_direct_across_n_coords)) continue;
 					empty_cells_coords.push_back(top_direct_across_n_coords);
 				}
 			}
@@ -584,8 +583,8 @@ void Automata::migratingBridges() {
 		_cells[current_coords.z][current_coords.y][current_coords.x] = 0;
 	}
 
-//	delete actives_not_dimer;
-	delete bridge_cells;
+	delete actives_not_dimer;
+//	delete bridge_cells;
 }
 
 SetOfCells* Automata::unionCells(const SetOfCells& s1, const SetOfCells& s2) {
@@ -600,16 +599,16 @@ SetOfCells* Automata::differentCells(const SetOfCells& s1, const SetOfCells& s2)
 	return result;
 }
 
-bool Automata::isCanDirectMigrating(Cell* cell, const int3& to_coords) {
-	if (cell->active() > 0) return true;
-
-	int3 direct_n_coords[2];
-	directNeighboursCoords(to_coords, direct_n_coords);
-	Cell* direct_n_cells[2];
-	for (int i = 0; i < 2; ++i) direct_n_cells[i] = getCell(direct_n_coords[i]);
-	return (!direct_n_cells[0] || !direct_n_cells[1] ||
-			direct_n_cells[0]->active() > 0 || direct_n_cells[1]->active() > 0);
-}
+//bool Automata::isCanDirectMigrating(Cell* cell, const int3& to_coords) {
+//	if (cell->active() > 0) return true;
+//
+//	int3 direct_n_coords[2];
+//	directNeighboursCoords(to_coords, direct_n_coords);
+//	Cell* direct_n_cells[2];
+//	for (int i = 0; i < 2; ++i) direct_n_cells[i] = getCell(direct_n_coords[i]);
+//	return (!direct_n_cells[0] || !direct_n_cells[1] ||
+//			direct_n_cells[0]->active() > 0 || direct_n_cells[1]->active() > 0);
+//}
 
 void Automata::activate(Cell* cell) {
 	cell->activate();
