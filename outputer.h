@@ -34,10 +34,29 @@ public:
 private:
 	Outputer() { }
 
-	void outInfoHead(std::ostream& os) { os << _ca->infoHead(); }
-	void outInfoBody(std::ostream& os) { os << _ca->infoBody(); }
-	void outArea(std::ostream& os) { os << _ca->typesArea(); }
-	void outSpecs(std::ostream& os) { os << _ca->specsArea(); }
+	inline void outEndl(std::ostream& os) {
+		if (_config.count("clear-output-buffers") > 0 && _config.find("clear-output-buffers")->second) {
+			os << std::endl;
+		} else {
+			os << '\n';
+		}
+	}
+	inline void outInfoHead(std::ostream& os) {
+		os << _ca->infoHead();
+		outEndl(os);
+	}
+	inline void outInfoBody(std::ostream& os) {
+		os << _ca->infoBody();
+		outEndl(os);
+	}
+	inline void outArea(std::ostream& os) {
+		os << _ca->typesArea();
+		outEndl(os);
+	}
+	inline void outSpecs(std::ostream& os) {
+		os << _ca->specsArea();
+		outEndl(os);
+	}
 
 	static std::string formatTime(float secs);
 	static std::string humanName(float value, const char* one, const char* few, const char* many);

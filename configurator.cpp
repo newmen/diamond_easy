@@ -27,6 +27,7 @@ Configurator::Configurator() : _need_help(false), _config_file_name(CONFIG_FILE)
 
 	_outputer_config["only-info"] = false;
 	_outputer_config["only-specs"] = false;
+	_outputer_config["clear-output-buffers"] = false;
 	_outputer_config["without-area"] = false;
 	_outputer_config["without-info"] = false;
 	_outputer_config["with-specs"] = false;
@@ -52,6 +53,7 @@ void Configurator::parseParams(int argc, char* argv[]) {
 	boost::regex rx_wo_bm_ud("-wo-bm-ud|--without-bridge-migration-up-down");
 	boost::regex rx_oi("-oi|--only-info");
 	boost::regex rx_os("-os|--only-specs");
+	boost::regex rx_cob("-cob|--clear-output-buffers");
 	boost::regex rx_wo_a("-wo-a|--without-area");
 	boost::regex rx_wo_i("-wo-i|--without-info");
 	boost::regex rx_w_s("-w-s|--with-specs");
@@ -79,6 +81,7 @@ void Configurator::parseParams(int argc, char* argv[]) {
 		else if (boost::regex_match(current_param, matches, rx_wo_bm_ud)) _automata_config["bridge-migration-up-down"] = false;
 		else if (boost::regex_match(current_param, matches, rx_oi)) _outputer_config["only-info"] = true;
 		else if (boost::regex_match(current_param, matches, rx_os)) _outputer_config["only-specs"] = true;
+		else if (boost::regex_match(current_param, matches, rx_cob)) _outputer_config["clear-output-buffers"] = true;
 		else if (boost::regex_match(current_param, matches, rx_wo_a)) _outputer_config["without-area"] = true;
 		else if (boost::regex_match(current_param, matches, rx_wo_i)) _outputer_config["without-info"] = true;
 		else if (boost::regex_match(current_param, matches, rx_w_s)) _outputer_config["with-specs"] = true;
@@ -129,6 +132,8 @@ std::string Configurator::help() const {
 			<< "\n"
 			<< "  -oi, --only-info - выводить информацию в стандартный поток вывода и не сохранять выходные файлы\n"
 			<< "  -os, --only-specs - выводить содержащиеся виды в стандартный поток вывода и не сохранять выходные файлы\n"
+			<< "\n"
+			<< "  -cob, --clear-output-buffers - отчищать каждый раз буфер, при сохранении выходных файлов\n"
 			<< "\n"
 			<< "  -wo-a, --without-area - не сохранять файл для визуализации\n"
 			<< "  -wo-i, --without-info - не сохранять инфо\n"
