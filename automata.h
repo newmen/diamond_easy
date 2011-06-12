@@ -56,7 +56,7 @@ private:
 	void formingDimers();
 	void droppingDimers();
 
-	static SetOfCells* unionCells(const SetOfCells& s1, const SetOfCells& s2);
+//	static SetOfCells* unionCells(const SetOfCells& s1, const SetOfCells& s2);
 	static SetOfCells* differentCells(const SetOfCells& s1, const SetOfCells& s2);
 
 	Cell* getCell(const int3& coords) const {
@@ -64,8 +64,8 @@ private:
 	}
 
 	bool isAvailableForMigrating(Cell* cells[2]) const {
-//		return cells[0] && cells[1] && ((cells[0]->active() > 0 && cells[1]->active() > 0) || isDimer(cells));
-		return cells[0] && cells[1] && isDimer(cells);
+		return cells[0] && cells[1] && ((cells[0]->active() > 0 && cells[1]->active() > 0) || isDimer(cells));
+//		return cells[0] && cells[1] && isDimer(cells);
 	}
 
 	bool isAvailableForMigrating(Cell* cell1, Cell* cell2) const {

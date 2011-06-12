@@ -587,11 +587,11 @@ void Automata::migratingBridges() {
 //	delete bridge_cells;
 }
 
-SetOfCells* Automata::unionCells(const SetOfCells& s1, const SetOfCells& s2) {
-	SetOfCells* result = new SetOfCells;
-	std::set_union(s1.begin(), s1.end(), s2.begin(), s2.end(), std::inserter(*result, result->begin()));
-	return result;
-}
+//SetOfCells* Automata::unionCells(const SetOfCells& s1, const SetOfCells& s2) {
+//	SetOfCells* result = new SetOfCells;
+//	std::set_union(s1.begin(), s1.end(), s2.begin(), s2.end(), std::inserter(*result, result->begin()));
+//	return result;
+//}
 
 SetOfCells* Automata::differentCells(const SetOfCells& s1, const SetOfCells& s2) {
 	SetOfCells* result = new SetOfCells;
