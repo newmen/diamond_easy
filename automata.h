@@ -19,7 +19,7 @@
 
 namespace DiamondCA {
 
-typedef std::pair<int, int> RangeOfCells;
+typedef std::pair<int, int> Range;
 typedef std::set<Cell*> SetOfCells;
 typedef std::map<Cell*, Cell*> CellToCell;
 
@@ -30,10 +30,10 @@ public:
 	Automata(const Handbook& handbook, const FlagsConfig& config, Outputer& outputer);
 	virtual ~Automata();
 
-	void stickToCells(const char* mix, const RangeOfCells& z_range);
-	void stickToCells(const char* mix, const RangeOfCells& z_range, const RangeOfCells& y_range);
-	void stickToCells(const char* mix, const RangeOfCells& z_range, const RangeOfCells& y_range,
-			const RangeOfCells& x_range);
+	void stickToCells(const char* mix, const Range& z_range);
+	void stickToCells(const char* mix, const Range& z_range, const Range& y_range);
+	void stickToCells(const char* mix, const Range& z_range, const Range& y_range,
+			const Range& x_range);
 
 	std::string typesArea() const;
 	std::string specsArea() const;

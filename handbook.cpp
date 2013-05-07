@@ -65,7 +65,7 @@ void Handbook::parseConfig(const std::string& config_file_name) {
 	}
 
 	VarVal temperature_section = _params.find("temperature")->second;
-	_T = temperature_section.find("T")->second;
+	_temperature = temperature_section.find("T")->second;
 }
 
 void Handbook::setSizes(const int3& sizes) {
@@ -104,7 +104,7 @@ double Handbook::kMole(const std::string& key) const {
 	VarVal factors_section = _params.find("factors")->second;
 	double A = factors_section.find(key)->second;
 
-	return A * exp(-Ea / (R * _T));
+	return A * exp(-Ea / (_R * _temperature));
 }
 
 double Handbook::percentOfNotDimers() const {

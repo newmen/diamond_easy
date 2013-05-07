@@ -13,15 +13,13 @@
 
 #include "int3.h"
 
-#define R 8.31
-
 namespace DiamondCA {
 
 class Handbook {
 	typedef std::map<std::string, double> VarVal;
 
 public:
-	Handbook() { }
+	Handbook() : _R(8.31) { }
 	virtual ~Handbook() { }
 
 	void parseConfig(const std::string& config_file_name);
@@ -30,7 +28,7 @@ public:
 	void setSizes(const int3& sizes);
 	double dt() const;
 
-	double temperature() const { return _T; }
+	double temperature() const { return _temperature; }
 	double kMolecule(const std::string& key) const;
 
 	double percentOfNotDimers() const;
@@ -42,11 +40,13 @@ private:
 
 
 private:
+	const float _R;
 	std::map<std::string, VarVal> _params;
 	int3 _sizes;
 
-	double _T;
+	double _temperature;
 };
+//Handbook::_R = 8.31;
 
 }
 

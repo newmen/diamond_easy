@@ -1,4 +1,5 @@
+*.user
 *.o
 .project
 .cproject
-diamond_easy
+diamond_easy*

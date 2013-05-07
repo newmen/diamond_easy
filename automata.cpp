@@ -45,7 +45,7 @@ Automata::Automata(const Handbook& handbook, const FlagsConfig& config, Outputer
 		}
 	}
 
-	stickToCells("", RangeOfCells(0, 0));
+	stickToCells("", Range(0, 0));
 
 	_dt = handbook.dt();
 	_k_abs_H_dt = handbook.kMolecule("abs_H") * _dt;
@@ -68,18 +68,18 @@ Automata::~Automata() {
 	delete[] _cells;
 }
 
-void Automata::stickToCells(const char* mix, const RangeOfCells& z_range) {
-	RangeOfCells y_range(0, _sizes.y - 1);
+void Automata::stickToCells(const char* mix, const Range& z_range) {
+	Range y_range(0, _sizes.y - 1);
 	stickToCells(mix, z_range, y_range);
 }
 
-void Automata::stickToCells(const char* mix, const RangeOfCells& z_range, const RangeOfCells& y_range) {
-	RangeOfCells x_range(0, _sizes.x - 1);
+void Automata::stickToCells(const char* mix, const Range& z_range, const Range& y_range) {
+	Range x_range(0, _sizes.x - 1);
 	stickToCells(mix, z_range, y_range, x_range);
 }
 
-void Automata::stickToCells(const char* mix, const RangeOfCells& z_range, const RangeOfCells& y_range,
-		const RangeOfCells& x_range)
+void Automata::stickToCells(const char* mix, const Range& z_range, const Range& y_range,
+		const Range& x_range)
 {
 	for (int iz = z_range.first; iz <= z_range.second; ++iz) {
 		for (int iy = y_range.first; iy <= y_range.second; ++iy) {
